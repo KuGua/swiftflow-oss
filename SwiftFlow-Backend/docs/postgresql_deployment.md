@@ -58,7 +58,6 @@ This will:
 - create tables if they do not exist
 - seed core roles
 - ensure a clean default `admin / admin` account exists
-- ensure a clean default `area_manager / area_manager` account exists
 - remove any legacy placeholder area named `Default Area` if present
 
 ## Recommended production rollout

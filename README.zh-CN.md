@@ -99,8 +99,6 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 
 初始化脚本会创建数据库结构，并为本地环境准备默认的 `admin / admin` 账户。
 
-同时也会创建默认的 `area_manager / area_manager` 账户，方便直接测试区域经理工作流。管理员登录后，可在用户管理中为该账号分配具体区域范围。
-
 如果需要一套更完整的演示环境，包括多门店、区域归属以及不同权限等级的员工账号，可运行：
 
 ```bash
@@ -113,6 +111,8 @@ python reset_test_data.py
 - `demo_area_manager / demo_area_manager`
 - `demo_store_manager / demo_store_manager`
 - `demo_staff / demo_staff`
+
+这些 demo 账号就是当前推荐使用的系统演示入口。
 
 同时会创建多个演示门店、分配示例区域，并将这些账号分别绑定到对应员工档案和管理范围。
 
