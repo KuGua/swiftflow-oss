@@ -17,6 +17,7 @@ from database import (
     Store,
     StoreScheduleRuleConfig,
     StoreStaffingDemand,
+    Role,
     User,
     UserAreaAccess,
     UserStoreAccess,
@@ -69,6 +70,16 @@ def upsert_store(db, name: str, open_time: str, close_time: str) -> Store:
     store.open_time = parse_time(open_time)
     store.close_time = parse_time(close_time)
     return store
+
+
+def upsert_area(db, name: str) -> Area:
+    area = db.query(Area).filter(Area.name == name).first()
+    if not area:
+        area = Area(name=name)
+        db.add(area)
+        db.flush()
+    area.name = name
+    return area
 
 
 def upsert_employee(
@@ -208,6 +219,44 @@ def replace_area_manager_area_access(db, manager_username: str, area_names: list
         db.add(UserAreaAccess(user_id=manager.id, area_id=area.id))
 
 
+def upsert_demo_user(
+    db,
+    *,
+    username: str,
+    full_name: str,
+    password: str,
+    role_code: RoleCode,
+    employee_id: int | None,
+):
+    role = db.query(Role).filter(Role.code == role_code).first()
+    if not role:
+        raise RuntimeError(f"Role not found: {role_code.value}")
+
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        user = User(
+            username=username,
+            full_name=full_name,
+            password_hash=password,
+            role_id=role.id,
+            employee_id=employee_id,
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+    else:
+        user.full_name = full_name
+        user.password_hash = password
+        user.role_id = role.id
+        user.employee_id = employee_id
+        user.is_active = True
+        for link in list(user.store_links):
+            db.delete(link)
+        for link in list(user.area_links):
+            db.delete(link)
+    return user
+
+
 def replace_employee_relations(db, employee_name_to_id: dict[str, int]):
     db.query(EmployeeRelation).delete(synchronize_session=False)
     relation_specs = []
@@ -232,6 +281,7 @@ def clear_existing_business_rows(db):
     db.query(ScheduleEntry).delete(synchronize_session=False)
     db.query(StoreStaffingDemand).delete(synchronize_session=False)
     db.query(StoreScheduleRuleConfig).delete(synchronize_session=False)
+    db.query(UserAreaAccess).delete(synchronize_session=False)
     db.query(EmployeeAvailability).delete(synchronize_session=False)
     db.query(EmployeeSkill).delete(synchronize_session=False)
     db.query(EmployeeRelation).delete(synchronize_session=False)
@@ -239,6 +289,7 @@ def clear_existing_business_rows(db):
     db.query(UserStoreAccess).delete(synchronize_session=False)
     db.query(Employee).delete(synchronize_session=False)
     db.query(Store).delete(synchronize_session=False)
+    db.query(Area).delete(synchronize_session=False)
     db.commit()
 
 
@@ -248,10 +299,21 @@ def main():
     try:
         clear_existing_business_rows(db)
 
+        area_specs = [
+            {"key": "north", "name": "示例北区"},
+            {"key": "south", "name": "示例南区"},
+        ]
+        area_id_map: dict[str, int] = {}
+        for spec in area_specs:
+            area = upsert_area(db, spec["name"])
+            db.flush()
+            area_id_map[spec["key"]] = area.id
+
         store_specs = [
             {
                 "key": "store_a",
                 "name": "示例店A-高峰型",
+                "area_key": "north",
                 "open_time": "09:00",
                 "close_time": "23:00",
                 "schedule_archetype": "peak_dual_core",
@@ -267,6 +329,7 @@ def main():
             {
                 "key": "store_b",
                 "name": "示例店B-轻量型",
+                "area_key": "north",
                 "open_time": "09:00",
                 "close_time": "21:30",
                 "schedule_archetype": "light_single_core",
@@ -281,6 +344,7 @@ def main():
             {
                 "key": "store_c",
                 "name": "示例店C-标准型",
+                "area_key": "north",
                 "open_time": "09:00",
                 "close_time": "22:30",
                 "schedule_archetype": "auto",
@@ -295,6 +359,7 @@ def main():
             {
                 "key": "store_d",
                 "name": "示例店D-网格型",
+                "area_key": "south",
                 "open_time": "09:00",
                 "close_time": "22:30",
                 "schedule_archetype": "auto",
@@ -309,6 +374,7 @@ def main():
             {
                 "key": "store_e",
                 "name": "示例店E-中量型",
+                "area_key": "south",
                 "open_time": "09:00",
                 "close_time": "22:00",
                 "schedule_archetype": "auto",
@@ -323,6 +389,7 @@ def main():
             {
                 "key": "store_f",
                 "name": "示例店F-周末峰值型",
+                "area_key": "south",
                 "open_time": "09:00",
                 "close_time": "22:30",
                 "schedule_archetype": "auto",
@@ -340,6 +407,7 @@ def main():
         for spec in store_specs:
             store = upsert_store(db, spec["name"], spec["open_time"], spec["close_time"])
             db.flush()
+            store.area_id = area_id_map[spec["area_key"]]
             store_id_map[spec["key"]] = store.id
             replace_store_rule_config(
                 db,
@@ -356,6 +424,67 @@ def main():
             replace_store_staffing_demand(db, store_id=store.id, profiles_by_day=spec["profiles_by_day"])
 
         employee_specs = [
+            {
+                "name": "演示区域经理",
+                "employment_type": EmploymentType.FULL_TIME,
+                "preferred_shift": "opening",
+                "nationality_status": NationalityStatus.OTHER,
+                "work_skill_score": 90,
+                "management_skill_score": 92,
+                "monthly_worked_hours": 96.0,
+                "stores": [
+                    {"store_key": "store_a", "priority": 1, "has_key": True},
+                    {"store_key": "store_b", "priority": 2, "has_key": False},
+                    {"store_key": "store_c", "priority": 3, "has_key": False},
+                ],
+                "skills": [
+                    {"skill_code": "front_service", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "cashier", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "backroom", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "inventory", "level": SkillLevel.PROFICIENT},
+                ],
+                "weekly_schedule": schedule_for_days([0, 1, 2, 3, 4], "09:00", "18:00"),
+            },
+            {
+                "name": "演示店长",
+                "employment_type": EmploymentType.FULL_TIME,
+                "preferred_shift": "opening",
+                "nationality_status": NationalityStatus.OTHER,
+                "work_skill_score": 86,
+                "management_skill_score": 88,
+                "monthly_worked_hours": 124.0,
+                "stores": [
+                    {"store_key": "store_c", "priority": 1, "has_key": True},
+                ],
+                "skills": [
+                    {"skill_code": "front_service", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "cashier", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "floor", "level": SkillLevel.PROFICIENT},
+                    {"skill_code": "backroom", "level": SkillLevel.BASIC},
+                ],
+                "weekly_schedule": schedule_for_days([0, 1, 2, 3, 4, 5], "09:00", "19:00"),
+            },
+            {
+                "name": "演示员工",
+                "employment_type": EmploymentType.PART_TIME,
+                "preferred_shift": "midday",
+                "nationality_status": NationalityStatus.OTHER,
+                "work_skill_score": 74,
+                "management_skill_score": 38,
+                "monthly_worked_hours": 64.0,
+                "stores": [
+                    {"store_key": "store_c", "priority": 2, "has_key": False},
+                ],
+                "skills": [
+                    {"skill_code": "front_service", "level": SkillLevel.BASIC},
+                    {"skill_code": "cashier", "level": SkillLevel.BASIC},
+                    {"skill_code": "floor", "level": SkillLevel.BASIC},
+                ],
+                "weekly_schedule": merge_schedule_windows(
+                    schedule_for_days([1, 2, 4], "12:00", "20:00"),
+                    schedule_for_days([5, 6], "14:00", "22:00"),
+                ),
+            },
             # Store A demo uses anonymized staff names and a generic availability sample.
             {"name": "FT_A1", "employment_type": EmploymentType.FULL_TIME, "preferred_shift": "opening", "nationality_status": NationalityStatus.OTHER, "work_skill_score": 92, "management_skill_score": 84, "monthly_worked_hours": 128.0, "stores": [{"store_key": "store_a", "priority": 1, "has_key": True}], "skills": [{"skill_code": "front_service", "level": SkillLevel.PROFICIENT}, {"skill_code": "cashier", "level": SkillLevel.PROFICIENT}, {"skill_code": "floor", "level": SkillLevel.PROFICIENT}, {"skill_code": "backroom", "level": SkillLevel.PROFICIENT}, {"skill_code": "inventory", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_backroom_clean", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_machine_clean", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_settlement", "level": SkillLevel.PROFICIENT}], "weekly_schedule": schedule_for_days([0, 1, 2, 3, 4, 5, 6], "09:00", "23:00")},
             {"name": "FT_A2", "employment_type": EmploymentType.FULL_TIME, "preferred_shift": "closing", "nationality_status": NationalityStatus.OTHER, "work_skill_score": 88, "management_skill_score": 80, "monthly_worked_hours": 134.0, "stores": [{"store_key": "store_a", "priority": 1, "has_key": True}], "skills": [{"skill_code": "front_service", "level": SkillLevel.PROFICIENT}, {"skill_code": "cashier", "level": SkillLevel.PROFICIENT}, {"skill_code": "floor", "level": SkillLevel.PROFICIENT}, {"skill_code": "backroom", "level": SkillLevel.PROFICIENT}, {"skill_code": "inventory", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_backroom_clean", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_machine_clean", "level": SkillLevel.PROFICIENT}, {"skill_code": "close_settlement", "level": SkillLevel.PROFICIENT}], "weekly_schedule": schedule_for_days([0, 1, 2, 3, 4, 5, 6], "09:00", "23:00")},
@@ -420,11 +549,46 @@ def main():
             employee_name_to_id[employee.name] = employee.id
 
         replace_employee_relations(db, employee_name_to_id)
+        upsert_demo_user(
+            db,
+            username="demo_area_manager",
+            full_name="Demo Area Manager",
+            password="demo_area_manager",
+            role_code=RoleCode.AREA_MANAGER,
+            employee_id=employee_name_to_id.get("演示区域经理"),
+        )
+        upsert_demo_user(
+            db,
+            username="demo_store_manager",
+            full_name="Demo Store Manager",
+            password="demo_store_manager",
+            role_code=RoleCode.STORE_MANAGER,
+            employee_id=employee_name_to_id.get("演示店长"),
+        )
+        upsert_demo_user(
+            db,
+            username="demo_staff",
+            full_name="Demo Staff",
+            password="demo_staff",
+            role_code=RoleCode.STAFF,
+            employee_id=employee_name_to_id.get("演示员工"),
+        )
+        replace_area_manager_area_access(db, "demo_area_manager", ["示例北区"])
+        replace_manager_store_access(db, "demo_store_manager", [store_id_map["store_c"]])
         db.commit()
 
         print("Seeded generic demo scheduling data successfully.")
+        print("Areas:", [spec["name"] for spec in area_specs])
         print("Stores:", [spec["name"] for spec in store_specs])
         print("Employees:", len(employees))
+        print(
+            "Demo accounts:",
+            [
+                "demo_area_manager / demo_area_manager",
+                "demo_store_manager / demo_store_manager",
+                "demo_staff / demo_staff",
+            ],
+        )
         print(
             "Part-time employees near 80h:",
             sorted(

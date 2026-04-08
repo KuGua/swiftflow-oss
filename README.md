@@ -101,6 +101,21 @@ The backend initialization script creates the schema and seeds a default `admin 
 
 It also seeds a default `area_manager / area_manager` account so the area-manager workflow can be tested immediately. After login, an admin can assign area scope to this account from user management.
 
+For a fuller demo environment with multiple stores, assigned areas, and role-specific employee accounts, run:
+
+```bash
+cd SwiftFlow-Backend
+python reset_test_data.py
+```
+
+This prepares demo accounts for:
+
+- `demo_area_manager / demo_area_manager`
+- `demo_store_manager / demo_store_manager`
+- `demo_staff / demo_staff`
+
+The demo seed also creates multiple stores, assigns them to sample areas, and links each demo account to the corresponding employee profile and scope.
+
 ## Production Notes
 
 - local development defaults to SQLite

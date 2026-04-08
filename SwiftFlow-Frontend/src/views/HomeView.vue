@@ -47,6 +47,7 @@
           <span v-for="item in visibilityItems" :key="item" class="soft-chip">{{ item }}</span>
         </div>
       </article>
+
       <article class="permission-card">
         <p class="section-kicker">可执行操作</p>
         <div class="chip-row">
@@ -127,7 +128,7 @@ const roleLabel = computed(() => {
 
 const roleSummary = computed(() => {
   if (isAdmin.value) return '负责系统级主数据、区域结构与角色配置。'
-  if (isAreaManager.value) return '负责所辖区域的门店排班、员工管理与店长协作。'
+  if (isAreaManager.value) return '负责所属区域的门店排班、员工管理与店长协作。'
   if (isStoreManager.value) return '负责本门店的排班执行、员工安排、规则与人力需求维护。'
   return '查看当前职责范围内的门店与员工信息。'
 })
@@ -186,20 +187,20 @@ const hero = computed(() => {
     return {
       eyebrow: 'Admin Workspace',
       title: '查看系统级主数据与权限结构',
-      description: '这里聚焦区域归属、门店主数据和组织角色设置，帮助你从治理视角掌握系统整体状态。',
+      description: '聚焦区域归属、门店主数据与组织角色设置，帮助你从治理视角掌握系统整体状态。',
     }
   }
   if (isAreaManager.value) {
     return {
       eyebrow: 'Area Operations',
       title: '掌握区域内门店、人力与排班准备度',
-      description: '这里优先展示你负责区域内的门店数量、员工结构和重点执行入口，方便快速进入区域管理。',
+      description: '优先展示你负责区域内的门店数量、员工结构和重点执行入口，方便快速进入区域管理。',
     }
   }
   return {
     eyebrow: 'Store Operations',
-    title: '查看本店执行状态并进入排班处理',
-    description: '这里聚焦你负责门店的人员安排、后场覆盖与当周排班执行，帮助你快速进入日常运营操作。',
+    title: '查看门店执行状态并进入排班处理',
+    description: '聚焦当前负责门店的人员安排、后场覆盖与当周排班执行，帮助快速进入日常运营操作。',
   }
 })
 
@@ -220,7 +221,6 @@ const heroActions = computed(() => {
   return [
     { label: '进入排班中心', to: '/shift-schedule' },
     { label: '查看员工管理', to: '/employees' },
-    { label: '查看店铺管理', to: '/stores' },
   ]
 })
 
@@ -235,30 +235,30 @@ const overviewCards = computed(() => {
   }
   if (isAreaManager.value) {
     return [
-      { label: '区域门店数', value: summary.value.managed_stores || stores.value.length, hint: '你当前负责的门店数量' },
-      { label: '区域员工数', value: summary.value.managed_employees || employees.value.length, hint: '所辖区域内员工总数' },
+      { label: '区域门店数', value: summary.value.managed_stores || stores.value.length, hint: '当前负责的门店数量' },
+      { label: '区域员工数', value: summary.value.managed_employees || employees.value.length, hint: '所属区域内员工总数' },
       { label: '可开店员工', value: openingReadyCount.value, hint: '同时具备前后场能力的员工' },
-      { label: '后场覆盖员工', value: backroomCapableCount.value, hint: '具备后场/库存能力的员工' },
+      { label: '后场覆盖员工', value: backroomCapableCount.value, hint: '具备后场或库存能力的员工' },
     ]
   }
   return [
-    { label: '负责门店数', value: summary.value.managed_stores || stores.value.length, hint: '你当前负责的门店数量' },
-    { label: '本店员工数', value: summary.value.managed_employees || employees.value.length, hint: '你当前可管理的员工总数' },
-    { label: '持钥匙配置', value: keyHolderAssignments.value, hint: '当前员工与门店之间的钥匙授权数' },
+    { label: '负责门店数', value: summary.value.managed_stores || stores.value.length, hint: '当前负责的门店数量' },
+    { label: '本店员工数', value: summary.value.managed_employees || employees.value.length, hint: '当前可管理的员工总数' },
+    { label: '钥匙授权数', value: keyHolderAssignments.value, hint: '员工与门店之间的钥匙权限配置' },
     { label: '全职 / 兼职', value: `${fullTimeCount.value} / ${partTimeCount.value}`, hint: '当前门店的人力结构' },
   ]
 })
 
 const visibilityItems = computed(() => {
   if (isAdmin.value) return ['全部门店主数据', '全部员工档案', '区域结构', '角色与账号信息']
-  if (isAreaManager.value) return ['所辖区域门店', '区域内排班信息', '区域员工档案', '区域店长信息']
+  if (isAreaManager.value) return ['所属区域门店', '区域排班信息', '区域员工档案', '区域店长信息']
   return ['负责门店信息', '本店排班', '本店员工档案', '本店规则与需求']
 })
 
 const capabilityItems = computed(() => {
-  if (isAdmin.value) return ['调整区域归属', '维护门店主数据', '配置角色权限', '查看系统总体状态']
-  if (isAreaManager.value) return ['编辑区域排班', '生成区域内门店排班', '编辑员工资料', '指派区域内店长']
-  return ['编辑本店排班', '生成本店/批量门店排班', '编辑员工资料', '维护规则与人力需求']
+  if (isAdmin.value) return ['调整区域归属', '维护门店主数据', '配置角色权限', '查看系统整体状态']
+  if (isAreaManager.value) return ['编辑区域排班', '生成区域门店排班', '编辑员工资料', '分配区域内店长']
+  return ['编辑本店排班', '生成本店排班', '编辑员工资料', '维护规则与人力需求']
 })
 
 const primarySection = computed(() => {
@@ -270,7 +270,7 @@ const primarySection = computed(() => {
       items: [
         {
           title: '区域归属完整度',
-          badge: `${assignedAreaStoreCount.value}/${stores.value.length}`,
+          badge: `${assignedAreaStoreCount.value}/${stores.value.length || 0}`,
           description: '优先检查门店是否已归属到对应区域，保证区域经理的管理范围清晰稳定。',
           meta: `未分配区域门店 ${unassignedAreaStoreCount.value} 家`,
         },
@@ -278,13 +278,13 @@ const primarySection = computed(() => {
           title: '账号与角色结构',
           badge: `${employees.value.length} 人`,
           description: '从员工与账号的对应关系出发，确认区域经理、店长和员工角色配置是否清晰。',
-          meta: '角色调整与账号分配建议从员工管理入口完成',
+          meta: '角色调整与账号分配建议从员工管理入口完成。',
         },
         {
           title: '门店主数据',
           badge: `${stores.value.length} 家门店`,
-          description: '查看门店名称、所属区域、营业时间等基础资料是否完整，保证后续配置与使用稳定。',
-          meta: '门店名称、区域与营业时间是当前主要维护内容',
+          description: '检查门店名称、所属区域与营业时间是否完整，保证后续配置与使用稳定。',
+          meta: '门店名称、区域与营业时间是当前主要维护内容。',
         },
       ],
     }
@@ -325,18 +325,18 @@ const sideSection = computed(() => {
           title: '未分配区域门店',
           badge: `${unassignedAreaStoreCount.value} 家`,
           description: '这部分门店建议优先补齐区域归属，便于后续区域化管理。',
-          meta: '可前往店铺管理中的区域看板处理',
+          meta: '可前往店铺管理中的区域看板处理。',
         },
         {
           title: '员工结构总览',
           badge: `${fullTimeCount.value}/${partTimeCount.value}`,
-          description: '快速了解系统内全职与兼职比例，确认新增注册员工是否已进入正确管理流程。',
+          description: '快速了解系统内全职与兼职比例，确认新员工是否进入正确管理流程。',
           meta: `开店能力 ${openingReadyCount.value} 人 · 后场覆盖 ${backroomCapableCount.value} 人`,
         },
         {
           title: '常用入口',
           description: '通过员工管理和店铺管理持续维护组织结构与主数据完整度。',
-          meta: '推荐入口：员工管理、店铺管理',
+          meta: '推荐入口：员工管理、店铺管理。',
         },
       ],
     }
@@ -350,42 +350,42 @@ const sideSection = computed(() => {
           title: '区域可开店员工',
           badge: `${openingReadyCount.value} 人`,
           description: '确认早班所需的前后场双技能人员是否足够覆盖区域内高峰门店。',
-          meta: '可在员工管理中继续核对门店归属与可排时间',
+          meta: '可在员工管理中继续核对门店归属与可排时间。',
         },
         {
           title: '区域后场覆盖',
           badge: `${backroomCapableCount.value} 人`,
-          description: '后场/库存能力直接影响开店和收尾安排，应优先关注覆盖不足的门店。',
-          meta: '重点检查区域内持钥匙与后场能力是否集中在少数员工',
+          description: '后场或库存能力直接影响开店和收尾安排，应优先关注覆盖不足的门店。',
+          meta: '重点检查钥匙权限与后场技能是否过度集中在少数员工。',
         },
         {
           title: '执行入口',
-          description: '你可以直接进入排班中心、员工管理与店铺管理处理区域内实际问题。',
-          meta: '排班生成范围会按你负责的门店收口',
+          description: '可以直接进入排班中心、员工管理与店铺管理处理区域内实际问题。',
+          meta: '排班生成与编辑范围会按当前负责区域收口。',
         },
       ],
     }
   }
   return {
     kicker: '店长执行重点',
-    title: '本店今日/本周优先项',
+    title: '本店今日与本周优先项',
     items: [
       {
         title: '门店排班入口',
         badge: `${summary.value.managed_stores || stores.value.length} 家`,
         description: '优先进入排班中心查看周历、重点异常和班次调整。',
-        meta: '若负责多家门店，可使用批量生成全部门店功能',
+        meta: '如负责多家门店，可在排班中心逐店处理。',
       },
       {
         title: '员工可排时间',
         badge: `${employees.value.length} 人`,
-        description: '店长可以查看并编辑员工可排班时间，保存时会有确认提示。',
-        meta: '除姓名外，其他员工资料可按权限维护',
+        description: '可查看并编辑员工可排班时间，减少因沟通遗漏导致的排班冲突。',
+        meta: '建议结合员工技能和门店授权一并检查。',
       },
       {
         title: '规则与人力需求',
-        description: '店长可维护本店排班规则与人力需求，用于支撑后续算法生成。',
-        meta: '建议先核对营业时间、需求峰值与收尾能力覆盖',
+        description: '持续维护本店排班规则与人力需求，用于支撑后续算法生成。',
+        meta: '建议先核对营业时间、需求峰值与收尾能力覆盖。',
       },
     ],
   }

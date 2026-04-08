@@ -5,7 +5,7 @@
         <div class="brand-block">
           <div class="brand-mark">SF</div>
           <div>
-            <p class="brand-kicker">智能零售排班</p>
+            <p class="brand-kicker">Smart Workforce Scheduling</p>
             <h1 class="brand-title">SwiftFlow</h1>
           </div>
         </div>
@@ -93,7 +93,7 @@ const navDefinitions = [
   { to: '/my-schedule', label: '我的排班', hint: '个人班表与可排时间', icon: '我的' },
   { to: '/stores', label: '店铺管理', hint: '营业时间、需求与规则', icon: '门店' },
   { to: '/employees', label: '员工管理', hint: '员工档案与业务权限', icon: '员工' },
-  { to: '/profile', label: '个人信息', hint: '维护注册资料与登录密码', icon: '账号' }
+  { to: '/profile', label: '个人信息', hint: '维护注册资料与登录密码', icon: '账号' },
 ]
 
 function syncAuthSnapshot() {
@@ -132,8 +132,8 @@ const currentDateLabel = computed(
     new Intl.DateTimeFormat('zh-SG', {
       month: 'short',
       day: 'numeric',
-      weekday: 'short'
-    }).format(new Date())
+      weekday: 'short',
+    }).format(new Date()),
 )
 
 watch(
@@ -141,7 +141,7 @@ watch(
   () => {
     syncAuthSnapshot()
     mobileNavOpen.value = false
-  }
+  },
 )
 
 function handleStorageChange() {
