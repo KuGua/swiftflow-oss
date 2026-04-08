@@ -398,6 +398,7 @@ def seed_core_data(db):
     db.commit()
 
     admin_role = db.query(Role).filter(Role.code == RoleCode.ADMIN).first()
+    area_manager_role = db.query(Role).filter(Role.code == RoleCode.AREA_MANAGER).first()
 
     legacy_usernames = set()
     for legacy_user in db.query(User).filter(User.username.in_(legacy_usernames)).all():
@@ -423,6 +424,26 @@ def seed_core_data(db):
         for link in list(admin_user.store_links):
             db.delete(link)
         for link in list(admin_user.area_links):
+            db.delete(link)
+    area_manager_user = db.query(User).filter(User.username == "area_manager").first()
+    if not area_manager_user:
+        area_manager_user = User(
+            username="area_manager",
+            full_name="Area Manager",
+            role_id=area_manager_role.id,
+            password_hash="area_manager",
+            is_active=True,
+        )
+        db.add(area_manager_user)
+    else:
+        area_manager_user.full_name = "Area Manager"
+        area_manager_user.role_id = area_manager_role.id
+        area_manager_user.password_hash = "area_manager"
+        area_manager_user.is_active = True
+        area_manager_user.employee_id = None
+        for link in list(area_manager_user.store_links):
+            db.delete(link)
+        for link in list(area_manager_user.area_links):
             db.delete(link)
     db.commit()
 
