@@ -1,0 +1,21 @@
+{
+  "shiftSchedule": {
+    "title": "Smart Scheduling System",
+    "algorithm": "Scheduling Algorithm",
+    "employees": "Employee List",
+    "employeeId": "Employee ID",
+    "employeeName": "Employee Name",
+    "addEmployee": "Add Employee",
+    "rules": "Scheduling Rules",
+    "cycleDays": "Cycle Days",
+    "startDate": "Start Date",
+    "maxShiftsPerEmployee": "Max Shifts per Employee",
+    "requiredShiftsPerDay": "Required Shifts per Day",
+    "generate": "Generate Schedule",
+    "generating": "Generating...",
+    "result": "Schedule Result",
+    "noEmployeesError": "Please add at least one employee",
+    "generationFailed": "Schedule generation failed",
+    "networkError": "Network error"
+  }
+}

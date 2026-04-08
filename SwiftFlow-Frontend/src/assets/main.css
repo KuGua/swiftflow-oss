@@ -1,0 +1,119 @@
+@import './base.css';
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.page-shell,
+.workspace-page,
+.home-page,
+.employee-workspace,
+.store-workspace,
+.page {
+  min-height: 100%;
+}
+
+.surface-card,
+.panel-shell,
+.card,
+.metric-card,
+.summary-card,
+.stat-card,
+.panel,
+.section-card,
+.toolbar-card,
+.login-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 18px 40px var(--theme-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.panel-shell,
+.section-card,
+.card,
+.panel {
+  padding: 20px;
+}
+
+.hero-panel,
+.workspace-hero,
+.hero {
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(248, 233, 215, 0.86));
+  border: 1px solid rgba(32, 51, 45, 0.1);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px var(--theme-shadow);
+}
+
+.primary-btn,
+.primary,
+.refresh-btn,
+button.primary,
+button[type='submit'] {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(222, 98, 54, 0.26);
+}
+
+.ghost-btn,
+.ghost,
+button.ghost {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: rgba(255, 253, 248, 0.72);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--color-text);
+  min-height: 44px;
+  padding: 10px 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
+}
+
+.status-banner,
+.notice,
+.error {
+  padding: 12px 14px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.status-banner,
+.notice.success {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.status-banner.error,
+.notice.error,
+.error {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+}

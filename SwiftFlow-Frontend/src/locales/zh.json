@@ -1,0 +1,21 @@
+{
+  "shiftSchedule": {
+    "title": "智能排班系统",
+    "algorithm": "排班算法",
+    "employees": "员工列表",
+    "employeeId": "员工ID",
+    "employeeName": "员工姓名",
+    "addEmployee": "添加员工",
+    "rules": "排班规则",
+    "cycleDays": "排班周期（天）",
+    "startDate": "开始日期",
+    "maxShiftsPerEmployee": "每人最大班次数",
+    "requiredShiftsPerDay": "每日所需班次数",
+    "generate": "生成排班",
+    "generating": "生成中...",
+    "result": "排班结果",
+    "noEmployeesError": "请至少添加一名员工",
+    "generationFailed": "排班生成失败",
+    "networkError": "网络错误"
+  }
+}
