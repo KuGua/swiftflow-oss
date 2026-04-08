@@ -118,4 +118,4 @@ This repository is a sanitized open-source edition of the project:
 
 ## License
 
-The repository license should be finalized before public release.
+This project is licensed under the MIT License. See the `LICENSE` file for details.

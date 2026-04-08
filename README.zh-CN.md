@@ -118,4 +118,4 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 
 ## 许可证
 
-正式对外发布前，建议先明确许可证。
+本项目采用 MIT License，详见仓库中的 `LICENSE` 文件。
